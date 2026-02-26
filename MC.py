@@ -108,13 +108,23 @@ elif selected == 'Used_cars':
 elif selected == 'bmi':
     st.title('BMI Classification')
 
+    gender = st.selectbox('เพศ', ['Female','Male'])
+    height = st.text_input('ส่วนสูง (cm)')
     weight = st.text_input('น้ำหนัก (kg)')
-    height = st.text_input('ส่วนสูง (m)')
 
     if st.button('Predict'):
-        prediction = bmi_model.predict([[
-            float(weight),
-            float(height)
-        ]])
+        try:
+            # encode gender เหมือนตอน train
+            gender_value = 0 if gender == 'Female' else 1
 
-        st.success(f"ผลลัพธ์ BMI: {prediction[0]}")
+            prediction = bmi_model.predict([[
+                gender_value,
+                float(height),
+                float(weight)
+            ]])
+
+            st.success(f"ผลลัพธ์ BMI Class: {prediction[0]}")
+
+        except:
+            st.error("กรุณากรอกข้อมูลให้ถูกต้อง")
+
