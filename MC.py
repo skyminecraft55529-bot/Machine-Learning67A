@@ -114,7 +114,6 @@ elif selected == 'bmi':
 
     if st.button('Predict'):
         try:
-            # encode gender เหมือนตอน train
             gender_value = 0 if gender == 'Female' else 1
 
             prediction = bmi_model.predict([[
@@ -123,8 +122,21 @@ elif selected == 'bmi':
                 float(weight)
             ]])
 
-            st.success(f"ผลลัพธ์ BMI Class: {prediction[0]}")
+            bmi_class = prediction[0]
+
+            # 🔥 เพิ่ม mapping ตรงนี้
+            bmi_result_map = {
+                0: "ผอมมาก (Extremely Weak)",
+                1: "ผอม (Weak)",
+                2: "ปกติ (Normal)",
+                3: "น้ำหนักเกิน (Overweight)",
+                4: "โรคอ้วน (Obesity)",
+                5: "โรคอ้วนรุนแรง (Extreme Obesity)"
+            }
+
+            result_text = bmi_result_map.get(bmi_class, "ไม่ทราบผล")
+
+            st.success(f"ผลการประเมิน: {result_text}")
 
         except:
             st.error("กรุณากรอกข้อมูลให้ถูกต้อง")
-
