@@ -9,12 +9,12 @@ import pickle
 from streamlit_option_menu import option_menu
 import streamlit as st
 
+# Load Models
 used_car_model = pickle.load(open('Used_cars_model.sav','rb'))
 riding_model = pickle.load(open('RidingMowers_model.sav','rb'))
 bmi_model = pickle.load(open('bmi_model.sav','rb'))
 
-
-
+# ================== Mapping ==================
 fuel_map = {
     'Diesel': 0,
     'Electric': 1,
@@ -25,7 +25,7 @@ engine_map = {
     '800': 0,
     '1000': 1,
     '1200': 2,
-   '1500': 3,
+    '1500': 3,
     '1800': 4,
     '2000': 5,
     '2500': 6,
@@ -51,40 +51,47 @@ transmission_map = {
     'Automatic': 0,
     'Manual': 1
 }
-with st.sidebar:
-    selected = option_menu('Prediction',
-                           ['Ridingmower','Used_cars','bmi'])
 
-if selected== 'Ridingmower':
+# ================== Sidebar ==================
+with st.sidebar:
+    selected = option_menu(
+        'Prediction',
+        ['Ridingmower','Used_cars','bmi']
+    )
+
+# ================== Riding Mower ==================
+if selected == 'Ridingmower':
     st.title('Riding Mower Classification')
-    
+
     Income = st.text_input('Income')
     LotSize = st.text_input('LotSize')
-    Riding_prediction = ''
+
     if st.button('Predict'):
-        Riding_prediction = riding_model.predict([[
+        prediction = riding_model.predict([[
             float(Income),
             float(LotSize)
-            ]])
-        if Riding_prediction[0]==1:
-            Riding_prediction = 'Owner'
+        ]])
+
+        if prediction[0] == 1:
+            st.success('Owner')
         else:
-            Riding_prediction = 'Non Owner'
-    st.success(Riding_prediction)
-    
-if selected == 'Used_cars':
+            st.success('Non Owner')
+
+# ================== Used Cars ==================
+elif selected == 'Used_cars':
     st.title('ประเมินราคารถมือ 2')
+
     make_year = st.text_input('ปีที่ผลิต')
     mileage_kmpl = st.text_input('กินน้ำมันกี่ KM/L')
-    engine_cc = st.selectbox('ขนาดเครื่องยนต์ (CC)', engine_map)
-    fuel_type = st.selectbox('ประเภทน้ำมัน', fuel_map)
+    engine_cc = st.selectbox('ขนาดเครื่องยนต์ (CC)', list(engine_map.keys()))
+    fuel_type = st.selectbox('ประเภทน้ำมัน', list(fuel_map.keys()))
     owner_count = st.text_input('จำนวนเจ้าของเดิม')
-    brand = st.selectbox('ยี่ห้อรถ', brand_map)
-    transmission = st.selectbox('ประเภทเกียร์', transmission_map)
+    brand = st.selectbox('ยี่ห้อรถ', list(brand_map.keys()))
+    transmission = st.selectbox('ประเภทเกียร์', list(transmission_map.keys()))
     accidents_reported = st.text_input('จำนวนอุบัติเหตุที่เคยเกิด')
-    Price_predict = ''
+
     if st.button('Predict'):
-        Price_predict = used_car_model.predict([[
+        prediction = used_car_model.predict([[
             float(make_year),
             float(mileage_kmpl),
             engine_map[engine_cc],
@@ -93,26 +100,21 @@ if selected == 'Used_cars':
             brand_map[brand],
             transmission_map[transmission],
             float(accidents_reported)
-            ]])
-        Price_predict = round(Price_predict[0],2)
+        ]])
 
-    if selected== 'bmi':
-    st.title('bmi Classification')
-    
-    Income = st.text_input('Income')
-    LotSize = st.text_input('LotSize')
-    Riding_prediction = ''
+        st.success(f"ราคาประเมิน: {round(prediction[0],2)} บาท")
+
+# ================== BMI ==================
+elif selected == 'bmi':
+    st.title('BMI Classification')
+
+    weight = st.text_input('น้ำหนัก (kg)')
+    height = st.text_input('ส่วนสูง (m)')
+
     if st.button('Predict'):
-        Riding_prediction = riding_model.predict([[
-            float(Income),
-            float(LotSize)
-            ]])
-        if Riding_prediction[0]==1:
-            Riding_prediction = 'Owner'
-        else:
-            Riding_prediction = 'Non Owner'
-    st.success(Riding_prediction)
+        prediction = bmi_model.predict([[
+            float(weight),
+            float(height)
+        ]])
 
-    st.success(Price_predict)
-
-
+        st.success(f"ผลลัพธ์ BMI: {prediction[0]}")
